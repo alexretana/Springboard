@@ -23,17 +23,17 @@ However, a toll bridge, with a two way toll, between the two cities causes drive
 
 1. In an attempt to quantify the success of encouraging drivers in Gotham and Metropolis to work in both cities, one could use the metric of percentage of drivers who are active in both citys compared to the weekday's average. That is:
 
-**_Success Metric = (DU<sub>f</sub>)/(U<sub>f</sub>) - (DU<sub>i</sub>)/(U<sub>i</sub>) , _** 
+####      **_Success Metric_ = (_DU<sub>f</sub>+)/(_U<sub>f</sub>_) - (_DU<sub>i</sub>_)/(_U<sub>i</sub>_) , ** 
 
-   _Where:_
+      _Where:_
 
-   **_DU<sub>f</sub>_** = _Number of Drivers active in both cities_
+      **_DU<sub>f</sub>_** = _Number of Drivers active in both cities_
 
-   **_U<sub>f</sub>_** = _Number of Drivers Active_
+      **_U<sub>f</sub>_** = _Number of Drivers Active_
 
-   **_DU<sub>i</sub>_** = _Average Number Of Drivers Active In Both City Averaged Over Weekday, Prior To Start Of Experiment_
+      **_DU<sub>i</sub>_** = _Average Number Of Drivers Active In Both City Averaged Over Weekday, Prior To Start Of Experiment_
 
-   **_U<sub>i</sub>_** =  _Average Number Of Drivers Active Averaged Over Weekday, Prior To Start Of Experiment_
+      **_U<sub>i</sub>_** =  _Average Number Of Drivers Active Averaged Over Weekday, Prior To Start Of Experiment_
 
 
 This is robust against false positives. With out using the percentage, an increase or decrease in users would not signify that users are encouraged to work in both cities, and without the second term, days like Friday would seem like there's a sudden increase in dual-city users.
