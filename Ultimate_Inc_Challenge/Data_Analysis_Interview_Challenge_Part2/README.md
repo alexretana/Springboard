@@ -22,7 +22,7 @@ However, a toll bridge, with a two way toll, between the two cities causes drive
 ### Answer:
 
 1. In an attempt to quantify the success of encouraging drivers in Gotham and Metropolis to work in both cities, one could use the metric of percentage of drivers who are active in both citys compared to the weekday's average. That is:
-   $$Success Metric = \frac{Number of Drivers active in both cities}{Number of Drivers Active} - \frac{Average Number Of Drivers Active In Both City Averaged Over Weekday, Prior}{Average Number Of Drivers Active Averaged Over Weekday, Prior}$$
+   _**Success Metric** = (**Number of Drivers active in both cities**)/(**Number of Drivers Active**) - (**Average Number Of Drivers Active In Both City Averaged Over Weekday, Prior**)/(**Average Number Of Drivers Active Averaged Over Weekday, Prior**)_
 
 This is robust against false positives. With out using the percentage, an increase or decrease in users would not signify that users are encouraged to work in both cities, and without the second term, days like Friday would seem like there's a sudden increase in dual-city users.
 
