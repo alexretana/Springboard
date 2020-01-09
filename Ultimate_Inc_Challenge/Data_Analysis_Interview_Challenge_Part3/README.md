@@ -41,3 +41,30 @@ Build a predictive model to help Ultimate determine whether or not a user will b
 
 ### Answer:
 
+Due to the limited size of the dataset, despite it being quite clean, simple standard binary classification algorithms should be used. In my experience, Logistic Regression, Random Forest, and Gradient Boosted Trees are great general purpose classifiers. A big advantage of these algorithm is their interpretability. The Logisitc Regression uses a linear equation with coefficients to split the high-dimensional space in half, where these cofficients express how relevant a feature is. For Radom Forest and Gradient Boosted Trees, they have feature importance, a measure of how significant features are for the decision trees that are built.
+
+Each model was trained using a Grid Search Cross Validation, a method where several models are trained using different hyper parameters, and then a score is given using k-fold cross validation.
+
+Out of these three models, the Gradient Boosted Tree yielded the best accuracy, as well as the best f1-scores. The accuracy was 0.778 when predicting values from the test data.
+
+Although the best model to predict with is the Gradient Boosted Tree, there is value in looking at the feature importance for all three models.
+
+## Sub-section 3
+
+### Question:
+
+Briefly discuss how Ultimate might leverage the insights gained from the model to improve its longterm rider retention (again, a few sentences will suffice).
+
+### Answer:
+
+As mentioned before, one of the great advantages of the three models that were trained is their interpretable decision making parameters. Below are the three plots, one for each model trained:
+
+![Feature Importance for LogisiticRegression](https://github.com/alexretana/Springboard/blob/master/Ultimate_Inc_Challenge/Images/Feature-importance-for-logistic-regression.png)
+![Feature Importance for RandomForestClassifer](https://github.com/alexretana/Springboard/blob/master/Ultimate_Inc_Challenge/Images/feature-importance-for-random-forest-classifier.png)
+![Feature Importance for GradientBoostingForest](https://github.com/alexretana/Springboard/blob/master/Ultimate_Inc_Challenge/Images/feature-imortance-for-gradient-boosting-forest.png)
+
+From the Logistic Regression coefficients, it seems like users from King's Landing are much more likely to be retained, and for whatever reason, android users don't seem to be retained.
+
+Looking toward the forest classifer, they both seem to be in agreement that the biggest deciding factors are the average rating by the drivers, being in King's Landing, the precentage of trips taken during the weekday, and the average surge multiplier.
+
+From this information, it could be recommended that King's Landing users can be used to further investigate what makes that location more successful. The precentage of trips taken during the weekday being a deciding feature indicates that retained users are those who need use it on the weekday, likely traveling for work. Assuming this, the marketing department could be told to focus more on demographic of employees who travel for work. Lastly, the surge multiplier affecting the decision indicates that users are less likely to be retained if they have a bad experience of high surge multipliers. A further cost analysis go be done to determine if it would be profitable to offer a discount to users who have higher than normal surge multiplier averages, to incentivize them to stay.
