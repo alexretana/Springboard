@@ -14,7 +14,7 @@ Perform any cleaning, exploratory analysis, and/or visualizations to use the pro
 
 The data clean up steps started out by transforming string columns to pandas' categorical dtype, while numerical and boolean columns were changed to numpy float-64 dtype. After looking at the .info method, it is revealed that there are 3 columns with NULL/missing data: phone, avg_rating_of_driver, and avg_rating_by_driver.
 
-![DataFrame Info](https://github.com/alexretana/Springboard/blob/master/Ultimate_Inc_Challenge/Images/Info.png)
+![DataFrame Info](https://github.com/alexretana/Springboard/blob/master/Ultimate_Inc_Challenge/Images/Info.PNG)
 
 Starting with the phone columns, which records what type of phone the user is pirmarily using to accesss the app as either IPhone or Android. There were 396 values that were null, but since there aren't too many, it should be suffice to convert null values with a new category, "Unknown"
 
