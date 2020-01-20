@@ -2,8 +2,10 @@ import sys, getopt
 import requests
 import pandas as pd
 import numpy as np
+import joblib
 
-def main(argv):
+#retrieves arguments and assigns it to complaintID
+def getRespUsinArgv(argv):
     complaintID = None
     try:
         opts, args = getopt.getopt(argv, "hi:", ['complaint='])
@@ -20,8 +22,10 @@ def main(argv):
     else: 
         print('Complaint ID unable to be read.')
         sys.exit()
-    print('Complaint #', complaintID, "'s outcome will be predicted:")
+    return complaintID
 
+#does API call and returns response
+def checkAndGetComplaintData(complaintID):
     apiurl = 'https://www.consumerfinance.gov/data-research/consumer-complaints/search/api/v1/'
     queriedUrl = apiurl + str(complaintID)
     resp = requests.get(queriedUrl)
@@ -32,11 +36,43 @@ def main(argv):
     if resp.json()['hits']['total'] == 0:
         print("Complaint ID yielded 0 result. Check to make sure you inputed it correctly.")
         sys.exit()
-    #Gets complaint Id from request
-    complaint_id = int(resp.json()['hits']['hits'][0]['_source']['complaint_id'])
+    return resp
 
+#function to apply to column to convert less common results to 'Other', as well as NaN
+def convertToOther(value, keepList):
+        if (value == ''):
+            return "Other"
+        else:
+            return value if value in keepList else "Other"
+
+#Lists top 23 value counts (allowed to exclude values), turns NaN to '' to others, converts to category dtype
+def cleanReduceConvert(df, column, blackList=[]):
+        keepList = []
+        for category in df[column].value_counts().head(23).index.tolist():
+            if (category.lower().split()[0] != "other"):
+                keepList.append(category)
+        for category in blackList:
+            try:
+                keepList.remove(category)
+            except ValueError:
+                pass
+        df[column].fillna('', inplace=True)
+        return pd.Series(df[column].apply(convertToOther, args=(keepList,)), dtype = 'category')
+
+#Transforms Narrative column to boolean response
+def entryOrNull(strVal):
+    return 1.0 if strVal is not np.nan else 0.0
+
+#splits date column into three columns per dataframe column meant to be split
+def dtToCols(df, dtcolumn):
+        df["{} day".format(dtcolumn)] = df[dtcolumn].dt.day
+        df["{} month".format(dtcolumn)] = df[dtcolumn].dt.month
+        df["{} year".format(dtcolumn)] = df[dtcolumn].dt.year
+
+#creates data frame and transforms it to agree with original model's trained dataframe
+def createDF(complaintID, resp):
     #Creates DataFrame from REST API response
-    df1 = pd.DataFrame(resp.json()['hits']['hits'][0]['_source'], index=[complaint_id])
+    df1 = pd.DataFrame(resp.json()['hits']['hits'][0]['_source'], index=[complaintID])
 
     #generate drop list for before preprocessing
     droplist1 = ['date_indexed_formatted',
@@ -127,42 +163,12 @@ def main(argv):
     booleanize = {'Yes': 1, 'No': 0}
     df['Timely response?'] = pd.Series(df['Timely response?'].map(booleanize), dtype = np.float)
 
-    #function to apply to column to convert less common results to 'Other', as well as NaN
-    def convertToOther(value, keepList):
-        if (value == ''):
-            return "Other"
-        else:
-            return value if value in keepList else "Other"
-        
-    #Lists top 23 value counts (allowed to exclude values), turns NaN to '' to others, converts to category dtype
-    def cleanReduceConvert(df, column, blackList=[]):
-        keepList = []
-        for category in df[column].value_counts().head(23).index.tolist():
-            if (category.lower().split()[0] != "other"):
-                keepList.append(category)
-        for category in blackList:
-            try:
-                keepList.remove(category)
-            except ValueError:
-                pass
-
-        df[column].fillna('', inplace=True)
-        return pd.Series(df[column].apply(convertToOther, args=(keepList,)), dtype = 'category')
-
     df['Sub-product'] = cleanReduceConvert(df, 'Sub-product', blackList= ['I do not know'])
     df['Issue'] = cleanReduceConvert(df, 'Issue')
     df['Sub-issue'] = cleanReduceConvert(df, 'Sub-issue')
     df['Company'] = cleanReduceConvert(df, 'Company')
 
-    def entryOrNull(strVal):
-        return 1.0 if strVal is not np.nan else 0.0
-
     df['Consumer complaint narrative submitted?'] = df['Consumer complaint narrative'].apply(entryOrNull)
-
-    def dtToCols(df, dtcolumn):
-        df["{} day".format(dtcolumn)] = df[dtcolumn].dt.day
-        df["{} month".format(dtcolumn)] = df[dtcolumn].dt.month
-        df["{} year".format(dtcolumn)] = df[dtcolumn].dt.year
         
     dtToCols(df, "Date received")
     dtToCols(df, "Date sent to company")
@@ -185,9 +191,10 @@ def main(argv):
                     "Closed with relief":"Closed with relief"}
     df["Company response to consumer"] = df["Company response to consumer"].map(twoOutputsDict)
 
+    return df
 
-
-    #data columns not be used for the model
+#data columns not be used for the model
+def dropUnusedCols(df):
     dropList = ["Consumer complaint narrative",
                 "Company public response",
                 "State",
@@ -199,7 +206,9 @@ def main(argv):
     X = df.drop(dropList, axis=1)
     Y = df["Company response to consumer"]
 
-    import joblib
+    return X, Y
+
+def loadModelPredict(X):
 
     pipeline_filename = "lrmodelpipeline.save"
 
@@ -209,6 +218,17 @@ def main(argv):
 
     print("Prediction of Outcome: ", prediction)
     print("With a ", round(pred_proba_perc, 2) , "% chance of being Closed with relief")
+
+def main(argv):
+    complaintID = getRespUsinArgv(argv)
+
+    resp = checkAndGetComplaintData(complaintID)
+
+    df = createDF(complaintID,resp)
+
+    X, Y = dropUnusedCols(df)
+
+    loadModelPredict(X)
     
 if __name__ == '__main__':
     main(sys.argv[1:])
