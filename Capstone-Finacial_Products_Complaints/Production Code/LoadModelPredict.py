@@ -219,6 +219,8 @@ def loadModelPredict(X):
     print("Prediction of Outcome: ", prediction)
     print("With a ", round(pred_proba_perc, 2) , "% chance of being Closed with relief")
 
+    return loaded_clf, prediction, pred_proba_perc
+
 def main(argv):
     complaintID = getRespUsinArgv(argv)
 

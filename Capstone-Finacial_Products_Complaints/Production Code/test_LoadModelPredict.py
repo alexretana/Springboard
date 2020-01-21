@@ -3,9 +3,8 @@ import LoadModelPredict as lmp
 import numpy as np
 import pandas as pd
 import random
+import sklearn
 from datetime import datetime, timedelta
-
-random.seed(42)
 
 def gen_datetime(min_year=1900, max_year=datetime.now().year):
     # generate a datetime in format yyyy-mm-dd hh:mm:ss.000000
@@ -15,6 +14,10 @@ def gen_datetime(min_year=1900, max_year=datetime.now().year):
     return start + (end - start) * random.random()
 
 class TestModel(unittest.TestCase):
+    random.seed(42)
+    complaintID = 3398126
+    resp = lmp.checkAndGetComplaintData(complaintID)
+
     def test_getRespUsinArgv(self):
         with self.assertRaises(SystemExit) as cm:
             lmp.getRespUsinArgv(None)
@@ -22,14 +25,12 @@ class TestModel(unittest.TestCase):
 
     
     def test_checkAndGetComplaintData(self):
-        complaintID = 3398126
-        resp = lmp.checkAndGetComplaintData(complaintID)
-        complaintIDreturn = int(resp.json()['hits']['hits'][0]['_source']['complaint_id'])
+        complaintIDreturn = int(self.__class__.resp.json()['hits']['hits'][0]['_source']['complaint_id'])
         #asserts complaint from api call equals the one inquired
-        self.assertEqual(complaintIDreturn,complaintID)
+        self.assertEqual(complaintIDreturn,self.__class__.complaintID)
 
         #asserts the status code for the response is indeed 200
-        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(self.__class__.resp.status_code, 200)
 
         #Checks that 0 hits is returned correctly
         with self.assertRaises(SystemExit):
@@ -72,6 +73,65 @@ class TestModel(unittest.TestCase):
         self.assertEqual(dtdf.columns.to_list(), ['test','test day', 'test month','test year'])
         self.assertTrue(dtdf['test day'].le(31).all())
         self.assertTrue(dtdf['test month'].le(12).all())
+
+    def test_createDF(self):
+        df = lmp.createDF(self.__class__.complaintID, self.__class__.resp)
+        final_cols = ['Date received',
+                    'Product',
+                    'Sub-product',
+                    'Issue',
+                    'Sub-issue',
+                    'Consumer complaint narrative',
+                    'Company public response',
+                    'Company',
+                    'State',
+                    'ZIP code',
+                    'Tags',
+                    'Consumer consent provided?',
+                    'Submitted via',
+                    'Date sent to company',
+                    'Company response to consumer',
+                    'Timely response?',
+                    'Consumer disputed?',
+                    'Consumer complaint narrative submitted?',
+                    'Date received day',
+                    'Date received month',
+                    'Date received year',
+                    'Date sent to company day',
+                    'Date sent to company month',
+                    'Date sent to company year']
+        self.assertEqual(df.columns.to_list(), final_cols)
+
+    def test_dropUnusedCols(self):
+        df = lmp.createDF(self.__class__.complaintID, self.__class__.resp)
+        X, Y = lmp.dropUnusedCols(df)
+        self.assertFalse(X.isna().any().any())
+        final_cols = ['Product',
+                    'Sub-product',
+                    'Issue',
+                    'Sub-issue',
+                    'Company',
+                    'ZIP code',
+                    'Consumer consent provided?',
+                    'Submitted via',
+                    'Timely response?',
+                    'Consumer complaint narrative submitted?',
+                    'Date received day',
+                    'Date received month',
+                    'Date received year',
+                    'Date sent to company day',
+                    'Date sent to company month',
+                    'Date sent to company year']
+        self.assertEqual(X.columns.to_list(), final_cols)
+
+    def test_loadModelPredict(self):
+        df = lmp.createDF(self.__class__.complaintID, self.__class__.resp)
+        X, Y = lmp.dropUnusedCols(df)
+        model, pred, perc = lmp.loadModelPredict(X)
+        self.assertIsNotNone(model)
+        self.assertTrue((pred in ['Closed with relief', 'Closed without relief']))
+        self.assertGreaterEqual(perc, 0)
+        self.assertLessEqual(perc,100)
 
 if __name__ == '__main__':
     unittest.main(exit=False)
