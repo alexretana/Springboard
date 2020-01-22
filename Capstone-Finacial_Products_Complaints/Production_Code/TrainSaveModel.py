@@ -11,6 +11,10 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import classification_report
 import joblib
+import wget
+
+url = 'http://files.consumerfinance.gov/ccdb/complaints.csv.zip'
+wget(url, './SavedModelAndData/Consumer_Complaints.csv.zip')
 
 
 
