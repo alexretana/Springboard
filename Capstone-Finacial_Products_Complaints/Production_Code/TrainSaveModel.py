@@ -12,9 +12,17 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import classification_report
 import joblib
 import wget
+import zipfile
+import os
 
 url = 'http://files.consumerfinance.gov/ccdb/complaints.csv.zip'
-wget(url, './SavedModelAndData/Consumer_Complaints.csv.zip')
+wget.download(url, './complaints.csv.zip')
+
+with zipfile.ZipFile('./complaints.csv.zip') as z:
+    # extract /res/drawable/icon.png from apk to /temp/...
+    z.extract('complaints.csv', '.')
+
+os.remove("complaints.csv.zip")
 
 
 
