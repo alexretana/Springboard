@@ -35,7 +35,7 @@ class TestModel(unittest.TestCase):
         #Checks that 0 hits is returned correctly
         with self.assertRaises(SystemExit):
             badResp = lmp.checkAndGetComplaintData(00000000)
-            self.arrertEqual(badResp.json()['hits']['total'], 0)
+            self.assertEqual(badResp.json()['hits']['total'], 0)
     
     def test_convertToOther(self):
         keepList = ['One','Two','Three']

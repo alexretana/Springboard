@@ -1,4 +1,4 @@
-from import Flask, requests
+from flask import Flask, requests
 from flask_restful import Resource, Api
 
 app = Flask(__name__)
