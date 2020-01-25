@@ -15,10 +15,12 @@ def gen_datetime(min_year=1900, max_year=datetime.now().year):
 
 class TestModel(unittest.TestCase):
 
-#     tsm.downloadCFPBDataset()
+    # tsm.downloadCFPBDataset()
 
-#     head = pd.read_csv('complaints.csv', nrows=5)
-#     head.to_csv('complaints.csv', index=False)
+    # head = pd.read_csv('complaints.csv', nrows=1000)
+    # head.to_csv('complaints.csv', index=False)
+
+    df = tsm.readCSVToDataFrame()
 
     def test_downloadCFPBDataset(self):
         #Ensure file was downloaded and is openable
@@ -79,43 +81,34 @@ class TestModel(unittest.TestCase):
         self.assertTrue(dtdf['test month'].le(12).all())
 
     def test_readCSVToDataFrame(self):
-        try:
-            open('./complaints.csv')
-
-        except(FileNotFoundError):
-            with self.assertRaises(FileNotFoundError):
-                tsm.readCSVToDataFrame()
-
-        else:
-            df = tsm.readCSVToDataFrame()
-            confirmedCols = ['Date received',
-                            'Product',
-                            'Sub-product',
-                            'Issue',
-                            'Sub-issue',
-                            'Consumer complaint narrative',
-                            'Company public response',
-                            'Company',
-                            'State',
-                            'ZIP code',
-                            'Tags',
-                            'Consumer consent provided?',
-                            'Submitted via',
-                            'Date sent to company',
-                            'Company response to consumer',
-                            'Timely response?',
-                            'Consumer disputed?']
-            #asserst index col assigned to complaint id
-            self.assertEqual(df.index.name, 'Complaint ID')
-            #asserts the columns are as expected
-            self.assertEqual(df.columns.to_list(),confirmedCols)
-            #assert date columns were parsed
-            self.assertEqual(df["Date received"].dtype, np.dtype('<M8[ns]'))
-            self.assertEqual(df["Date sent to company"].dtype, np.dtype('<M8[ns]'))
+        confirmedCols = ['Date received',
+                        'Product',
+                        'Sub-product',
+                        'Issue',
+                        'Sub-issue',
+                        'Consumer complaint narrative',
+                        'Company public response',
+                        'Company',
+                        'State',
+                        'ZIP code',
+                        'Tags',
+                        'Consumer consent provided?',
+                        'Submitted via',
+                        'Date sent to company',
+                        'Company response to consumer',
+                        'Timely response?',
+                        'Consumer disputed?']
+        #asserst index col assigned to complaint id
+        self.assertEqual(df.index.name, 'Complaint ID')
+        #asserts the columns are as expected
+        self.assertEqual(df.columns.to_list(),confirmedCols)
+        #assert date columns were parsed
+        self.assertEqual(df["Date received"].dtype, np.dtype('<M8[ns]'))
+        self.assertEqual(df["Date sent to company"].dtype, np.dtype('<M8[ns]'))
 
 
     def test_cleanDf(self):
-        df = tsm.cleanDf(tsm.readCSVToDataFrame())
+        df = tsm.cleanDf(self.__class__.df)
         final_cols = ['Date received',
                     'Product',
                     'Sub-product',
@@ -144,7 +137,7 @@ class TestModel(unittest.TestCase):
         self.assertEqual(df.columns.to_list(), final_cols)
 
     def test_dropUnusedCols(self):
-        df = tsm.cleanDf(tsm.readCSVToDataFrame())
+        df = tsm.cleanDf(self.__class__.df)
         X, Y = tsm.dropUnusedCols(df)
         #ensure data has no null values
         self.assertFalse(X.isna().any().any())
@@ -168,18 +161,18 @@ class TestModel(unittest.TestCase):
         self.assertEqual(X.columns.to_list(), final_cols)
 
     def test_createPreprocessorAndTrain(self):
-        df = tsm.cleanDf(tsm.readCSVToDataFrame())
+        df = tsm.cleanDf(self.__class__.df)
         X, Y = tsm.dropUnusedCols(df)
         preprocessor = tsm.createPreprocessorAndTrain(X)
         #preprocessor is returned (Not nothing is returned)
         self.assertIsNotNone(preprocessor)
 
     def test_gridSearchTrainLogisticRegression(self):
-        df = tsm.cleanDf(tsm.readCSVToDataFrame())
+        df = tsm.cleanDf(self.__class__.df)
         X, Y = tsm.dropUnusedCols(df)
         preprocessor = tsm.createPreprocessorAndTrain(X)
 
-        X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.3)
+        X_train, X_test, y_train, y_test = tsm.train_test_split(X, Y, test_size=0.3)
 
         encX_train = preprocessor.transform(X_train)
         encX_test = preprocessor.transform(X_test)

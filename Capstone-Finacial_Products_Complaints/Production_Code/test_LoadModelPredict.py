@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import random
 from datetime import datetime, timedelta
+import pdb
 
 def gen_datetime(min_year=1900, max_year=datetime.now().year):
     # generate a datetime in format yyyy-mm-dd hh:mm:ss.000000
@@ -32,6 +33,7 @@ class TestModel(unittest.TestCase):
         self.assertEqual(self.__class__.resp.status_code, 200)
 
         #Checks that 0 hits is returned correctly
+
         with self.assertRaises(SystemExit):
             badResp = lmp.checkAndGetComplaintData(00000000)
             self.assertEqual(badResp.json()['hits']['total'], 0)

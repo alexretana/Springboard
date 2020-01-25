@@ -180,7 +180,7 @@ def createPreprocessorAndTrain(X):
 def gridSearchTrainLogisticRegression(encX_train,encX_test, y_train):
 
     lr = LogisticRegression(n_jobs=-1, solver='saga', penalty='l1')
-    lr_para = {'C':[10,1.0,0.1,0.01], 
+    lr_para = {'C':[1.0,0.1,0.01], 
             'class_weight':[None,'balanced'],
             'max_iter':[50,100,150]}
 
