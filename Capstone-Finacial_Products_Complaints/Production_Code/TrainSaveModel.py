@@ -217,9 +217,9 @@ def main():
 
     X, Y = dropUnusedCols(df)
 
-    X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.3)
-
     preprocessor = createPreprocessorAndTrain(X)
+
+    X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.3)
 
     encX_train = preprocessor.transform(X_train)
     encX_test = preprocessor.transform(X_test)
