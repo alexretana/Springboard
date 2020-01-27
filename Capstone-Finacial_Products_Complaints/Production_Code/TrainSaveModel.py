@@ -9,12 +9,13 @@ from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import LabelEncoder
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import classification_report
+from sklearn.metrics import precision_recall_fscore_support, roc_auc_score
 import joblib
 import wget
 import zipfile
 import os
 import logging
+import datetime
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
@@ -220,9 +221,12 @@ def saveModel(preprocessor, bestfitLR):
                         ('logregclassifier', bestfitLR)])
 
     pipeline_filename = "lrmodelpipeline.save"
-    joblib.dump(clf, pipeline_filename) 
+    joblib.dump(clf, pipeline_filename)
 
     print('Model has been saved to :', pipeline_filename)
+
+def scoreLogger(y_test, y_pred):
+
 
 def main():
     downloadCFPBDataset()
