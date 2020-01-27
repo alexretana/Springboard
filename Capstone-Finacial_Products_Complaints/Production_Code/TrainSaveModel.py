@@ -17,14 +17,20 @@ import os
 import logging
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.ERROR)
 
-formatter = logging.Formatter
+formatter = logging.Formatter('%(asctime)s :: %(name)s :: %(levelname)s : %(messages)s')
+score_format = logging.Formatter('%(asctime)s :: %(name)s :: ')
 
 file_handler = logging.FileHandler('ModelTraining.log')
 file_handler.setFormatter(formatter)
 
+file_handler_score = logging.FileHandler('ModelScore.log')
+file_handler_score.setLevel(logging.INFO)
+file_handler_score.setFormatter(score_format)
+
 logger.addHandler(file_handler)
+logger.addHandler(file_handler_score)
 
 def downloadCFPBDataset():
     url = 'http://files.consumerfinance.gov/ccdb/complaints.csv.zip'
