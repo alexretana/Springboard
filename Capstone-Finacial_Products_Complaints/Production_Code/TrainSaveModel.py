@@ -14,7 +14,17 @@ import joblib
 import wget
 import zipfile
 import os
+import logging
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+formatter = logging.Formatter
+
+file_handler = logging.FileHandler('ModelTraining.log')
+file_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
 
 def downloadCFPBDataset():
     url = 'http://files.consumerfinance.gov/ccdb/complaints.csv.zip'

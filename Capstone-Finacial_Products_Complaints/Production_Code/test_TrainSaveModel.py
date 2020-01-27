@@ -3,8 +3,11 @@ import TrainSaveModel as tsm
 import pandas as pd
 import numpy as np
 import io
+import os
 import random
 from datetime import datetime, timedelta
+from sklearn.utils.testing import ignore_warnings
+from sklearn.exceptions import ConvergenceWarning
 
 def gen_datetime(min_year=1900, max_year=datetime.now().year):
     # generate a datetime in format yyyy-mm-dd hh:mm:ss.000000
@@ -15,12 +18,10 @@ def gen_datetime(min_year=1900, max_year=datetime.now().year):
 
 class TestModel(unittest.TestCase):
 
-    # tsm.downloadCFPBDataset()
+    tsm.downloadCFPBDataset()
 
-    # head = pd.read_csv('complaints.csv', nrows=1000)
-    # head.to_csv('complaints.csv', index=False)
-
-    df = tsm.readCSVToDataFrame()
+    head = pd.read_csv('complaints.csv', nrows=1000)
+    head.to_csv('complaints.csv', index=False)
 
     def test_downloadCFPBDataset(self):
         #Ensure file was downloaded and is openable
@@ -99,6 +100,7 @@ class TestModel(unittest.TestCase):
                         'Timely response?',
                         'Consumer disputed?']
         #asserst index col assigned to complaint id
+        df = tsm.readCSVToDataFrame()
         self.assertEqual(df.index.name, 'Complaint ID')
         #asserts the columns are as expected
         self.assertEqual(df.columns.to_list(),confirmedCols)
@@ -108,7 +110,8 @@ class TestModel(unittest.TestCase):
 
 
     def test_cleanDf(self):
-        df = tsm.cleanDf(self.__class__.df)
+        df = tsm.readCSVToDataFrame()
+        df = tsm.cleanDf(df)
         final_cols = ['Date received',
                     'Product',
                     'Sub-product',
@@ -137,7 +140,8 @@ class TestModel(unittest.TestCase):
         self.assertEqual(df.columns.to_list(), final_cols)
 
     def test_dropUnusedCols(self):
-        df = tsm.cleanDf(self.__class__.df)
+        df = tsm.readCSVToDataFrame()
+        df = tsm.cleanDf(df)
         X, Y = tsm.dropUnusedCols(df)
         #ensure data has no null values
         self.assertFalse(X.isna().any().any())
@@ -161,14 +165,16 @@ class TestModel(unittest.TestCase):
         self.assertEqual(X.columns.to_list(), final_cols)
 
     def test_createPreprocessorAndTrain(self):
-        df = tsm.cleanDf(self.__class__.df)
+        df = tsm.readCSVToDataFrame()
+        df = tsm.cleanDf(df)
         X, Y = tsm.dropUnusedCols(df)
         preprocessor = tsm.createPreprocessorAndTrain(X)
         #preprocessor is returned (Not nothing is returned)
         self.assertIsNotNone(preprocessor)
 
     def test_gridSearchTrainLogisticRegression(self):
-        df = tsm.cleanDf(self.__class__.df)
+        df = tsm.readCSVToDataFrame()
+        df = tsm.cleanDf(df)
         X, Y = tsm.dropUnusedCols(df)
         preprocessor = tsm.createPreprocessorAndTrain(X)
 
@@ -181,7 +187,20 @@ class TestModel(unittest.TestCase):
 
         self.assertIsInstance(y_pred, np.ndarray)
 
+    def test_saveModel(self):
+        df = tsm.readCSVToDataFrame()
+        df = tsm.cleanDf(df)
+        X, Y = tsm.dropUnusedCols(df)
+        preprocessor = tsm.createPreprocessorAndTrain(X)
 
+        X_train, X_test, y_train, y_test = tsm.train_test_split(X, Y, test_size=0.3)
+
+        encX_train = preprocessor.transform(X_train)
+        encX_test = preprocessor.transform(X_test)
+
+        bestfitLR, y_pred = tsm.gridSearchTrainLogisticRegression(encX_train, encX_test, y_train)
+
+        self.assertTrue(os.path.exists('lrmodelpipeline.save'))
 
 if __name__ == '__main__':
     unittest.main(exit=False)
