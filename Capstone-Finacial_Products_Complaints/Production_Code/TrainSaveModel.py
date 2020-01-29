@@ -9,19 +9,21 @@ from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import LabelEncoder
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import precision_recall_fscore_support, roc_auc_score
+from sklearn.metrics import precision_recall_fscore_support, roc_auc_score, accuracy_score
+from sklearn.exceptions import ConvergenceWarning
 import joblib
 import wget
 import zipfile
 import os
 import logging
 import datetime
+import warnings
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 
-formatter = logging.Formatter('%(asctime)s :: %(name)s :: %(levelname)s : %(messages)s')
-score_format = logging.Formatter('%(asctime)s :: %(name)s :: ')
+formatter = logging.Formatter('%(asctime)s | %(name)s | %(levelname)s | %(messages)s')
+score_format = logging.Formatter('%(asctime)s | %(name)s | %(messages)s | %(precision)s | %(recall)s | %(fscore)s | %(roc_auc)s | %(accuracy)s')
 
 file_handler = logging.FileHandler('ModelTraining.log')
 file_handler.setFormatter(formatter)
@@ -211,10 +213,21 @@ def gridSearchTrainLogisticRegression(encX_train,encX_test, y_train):
 
     return bestfitLR, y_pred
 
-def printEvaluation(y_test, y_pred):
-    print('Training Completed with these results: \n')
+def scoreLogger(y_test, y_pred):
+    (precision, recall, fscore, support) = precision_recall_fscore_support(y_test, y_pred, 
+                                    labels = ['Closed with relief', 'Closed without relief'], 
+                                    pos_label= 'Closed with relief')
+    
+    auc_score = roc_auc_score(y_test, y_pred)
+    accuracy = accuracy_score(y_test,y_pred)
 
-    print(classification_report(y_test, y_pred))
+    extra = {'precision': precision,
+            'recall' : recall,
+            'fscore' : fscore,
+            'roc_auc' : auc_score,
+            'accuracy' : accuracy}
+
+    logger.info('Scores in this order (precision, recall, fscore, roc_auc_score, accuracy)', extra=extra)
 
 def saveModel(preprocessor, bestfitLR):
     clf = Pipeline(steps=[('preprocessor', preprocessor),
@@ -223,12 +236,9 @@ def saveModel(preprocessor, bestfitLR):
     pipeline_filename = "lrmodelpipeline.save"
     joblib.dump(clf, pipeline_filename)
 
-    print('Model has been saved to :', pipeline_filename)
-
-def scoreLogger(y_test, y_pred):
-
-
 def main():
+    warnings.simplefilter("never", ConvergenceWarning)
+
     downloadCFPBDataset()
 
     df = readCSVToDataFrame()
@@ -246,9 +256,12 @@ def main():
 
     bestfitLR, y_pred = gridSearchTrainLogisticRegression(encX_train, encX_test, y_train)
 
-    printEvaluation(y_test,y_pred)
+    scoreLogger(y_test, y_pred)
 
     saveModel(preprocessor, bestfitLR)
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except Exception:
+        logger.exception('An ERROR has occured that stopped the model traing from finishing. Providing stack trace')

@@ -8,6 +8,9 @@ import random
 from datetime import datetime, timedelta
 from sklearn.utils.testing import ignore_warnings
 from sklearn.exceptions import ConvergenceWarning
+import warnings
+
+warnings.filterwarnings('ignore')
 
 def gen_datetime(min_year=1900, max_year=datetime.now().year):
     # generate a datetime in format yyyy-mm-dd hh:mm:ss.000000
@@ -201,6 +204,10 @@ class TestModel(unittest.TestCase):
         bestfitLR, y_pred = tsm.gridSearchTrainLogisticRegression(encX_train, encX_test, y_train)
 
         self.assertTrue(os.path.exists('lrmodelpipeline.save'))
+
+    def test_scoreLogger(self):
+        pass
+
 
 if __name__ == '__main__':
     unittest.main(exit=False)
