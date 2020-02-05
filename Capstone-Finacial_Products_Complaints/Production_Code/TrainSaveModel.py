@@ -17,23 +17,28 @@ import zipfile
 import os
 import logging
 import datetime
-import warnings
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.ERROR)
 
 formatter = logging.Formatter('%(asctime)s | %(name)s | %(levelname)s | %(messages)s')
-score_format = logging.Formatter('%(asctime)s | %(name)s | %(messages)s | %(precision)s | %(recall)s | %(fscore)s | %(roc_auc)s | %(accuracy)s')
+# score_format = logging.Formatter('%(asctime)s | %(name)s | %(messages)s | %(precision)s | %(recall)s | %(fscore)s | %(accuracy)s')
 
-file_handler = logging.FileHandler('ModelTraining.log')
+file_handler = logging.FileHandler('./LogsAndModels/ModelTrainingFailure.log')
+file_handler.setLevel(logging.ERROR)
 file_handler.setFormatter(formatter)
 
-file_handler_score = logging.FileHandler('ModelScore.log')
-file_handler_score.setLevel(logging.INFO)
-file_handler_score.setFormatter(score_format)
+# file_handler_score = logging.FileHandler('./LogsAndModels/ModelScore.log')
+# file_handler_score.setLevel(logging.INFO)
+# file_handler_score.setFormatter(score_format)
 
 logger.addHandler(file_handler)
-logger.addHandler(file_handler_score)
+# logger.addHandler(file_handler_score)
+
+# score_format = logging.Formatter('%(asctime)s | %(name)s | %(messages)s | %(precision)s | %(recall)s | %(fscore)s | %(accuracy)s')
+# file_handler_score = logging.FileHandler('./LogsAndModels/ModelScore.log')
+# file_handler_score.setLevel(logging.INFO)
+# file_handler_score.setFormatter(score_format)
+# logger.addHandler(file_handler_score)
 
 def downloadCFPBDataset():
     url = 'http://files.consumerfinance.gov/ccdb/complaints.csv.zip'
@@ -214,20 +219,25 @@ def gridSearchTrainLogisticRegression(encX_train,encX_test, y_train):
     return bestfitLR, y_pred
 
 def scoreLogger(y_test, y_pred):
+
+    score_format = logging.Formatter('%(asctime)s | %(name)s | %(messages)s | %(precision)s | %(recall)s | %(fscore)s | %(accuracy)s')
+    file_handler_score = logging.FileHandler('./LogsAndModels/ModelScore.log')
+    file_handler_score.setLevel(logging.INFO)
+    file_handler_score.setFormatter(score_format)
+    logger.addHandler(file_handler_score)
+
     (precision, recall, fscore, support) = precision_recall_fscore_support(y_test, y_pred, 
                                     labels = ['Closed with relief', 'Closed without relief'], 
                                     pos_label= 'Closed with relief')
     
-    auc_score = roc_auc_score(y_test, y_pred)
     accuracy = accuracy_score(y_test,y_pred)
 
     extra = {'precision': precision,
             'recall' : recall,
             'fscore' : fscore,
-            'roc_auc' : auc_score,
             'accuracy' : accuracy}
 
-    logger.info('Scores in this order (precision, recall, fscore, roc_auc_score, accuracy)', extra=extra)
+    logger.info('Scores in this order (precision, recall, fscore, accuracy)', extra=extra)
 
 def saveModel(preprocessor, bestfitLR):
     clf = Pipeline(steps=[('preprocessor', preprocessor),
@@ -237,7 +247,6 @@ def saveModel(preprocessor, bestfitLR):
     joblib.dump(clf, pipeline_filename)
 
 def main():
-    warnings.simplefilter("never", ConvergenceWarning)
 
     downloadCFPBDataset()
 

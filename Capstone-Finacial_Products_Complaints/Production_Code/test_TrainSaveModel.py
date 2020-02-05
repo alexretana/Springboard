@@ -8,9 +8,7 @@ import random
 from datetime import datetime, timedelta
 from sklearn.utils.testing import ignore_warnings
 from sklearn.exceptions import ConvergenceWarning
-import warnings
 
-warnings.filterwarnings('ignore')
 
 def gen_datetime(min_year=1900, max_year=datetime.now().year):
     # generate a datetime in format yyyy-mm-dd hh:mm:ss.000000
@@ -67,7 +65,7 @@ class TestModel(unittest.TestCase):
         self.assertEqual(1.0, tsm.entryOrNull(val2))
         valList = [2, '12', np.nan, 'test', np.nan]
         df = pd.DataFrame({'vals':valList})
-        testSeries = pd.Series(index=[1.0,0.0])
+        testSeries = pd.Series(index=[1.0, 0.0])
         #asserts outcome of list are changed correctly
         self.assertEqual(df['vals'].apply(tsm.entryOrNull).value_counts().index[0], testSeries.index[0])
         self.assertEqual(df['vals'].apply(tsm.entryOrNull).value_counts().index[1], testSeries.index[1])
@@ -206,7 +204,10 @@ class TestModel(unittest.TestCase):
         self.assertTrue(os.path.exists('lrmodelpipeline.save'))
 
     def test_scoreLogger(self):
-        pass
+        y_pred = np.array(['Closed with relief','Closed with relief','Closed with relief','Closed without relief','Closed without relief'])
+        y_test = np.array(['Closed with relief','Closed with relief','Closed with relief','Closed with relief','Closed without relief'])
+        tsm.logger.info('Why?')
+        tsm.scoreLogger(y_test, y_pred)
 
 
 if __name__ == '__main__':
