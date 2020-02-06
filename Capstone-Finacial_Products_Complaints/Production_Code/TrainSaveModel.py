@@ -19,26 +19,29 @@ import logging
 import datetime
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
-formatter = logging.Formatter('%(asctime)s | %(name)s | %(levelname)s | %(messages)s')
-# score_format = logging.Formatter('%(asctime)s | %(name)s | %(messages)s | %(precision)s | %(recall)s | %(fscore)s | %(accuracy)s')
+formatter = logging.Formatter('%(asctime)s | %(name)s | %(levelname)s | %(message)s')
 
 file_handler = logging.FileHandler('./LogsAndModels/ModelTrainingFailure.log')
 file_handler.setLevel(logging.ERROR)
 file_handler.setFormatter(formatter)
 
-# file_handler_score = logging.FileHandler('./LogsAndModels/ModelScore.log')
-# file_handler_score.setLevel(logging.INFO)
-# file_handler_score.setFormatter(score_format)
+file_handler_score = logging.FileHandler('./LogsAndModels/ModelScore.log')
+file_handler_score.setLevel(logging.INFO)
+file_handler_score.setFormatter(formatter)
 
 logger.addHandler(file_handler)
-# logger.addHandler(file_handler_score)
+logger.addHandler(file_handler_score)
 
-# score_format = logging.Formatter('%(asctime)s | %(name)s | %(messages)s | %(precision)s | %(recall)s | %(fscore)s | %(accuracy)s')
-# file_handler_score = logging.FileHandler('./LogsAndModels/ModelScore.log')
-# file_handler_score.setLevel(logging.INFO)
-# file_handler_score.setFormatter(score_format)
-# logger.addHandler(file_handler_score)
+logbestscore = logging.getLogger("BestScoreLogger")
+logbestscore.setLevel(logging.INFO)
+bestFormatter = logging.Formatter('%(asctime)s | %(message)s')
+best_score_handler = logging.FileHandler('./LogsAndModels/BestScore.log', 'w')
+best_score_handler.setLevel(logging.INFO)
+best_score_handler.setFormatter(bestFormatter)
+logbestscore.addHandler(best_score_handler)
+
 
 def downloadCFPBDataset():
     url = 'http://files.consumerfinance.gov/ccdb/complaints.csv.zip'
@@ -219,32 +222,45 @@ def gridSearchTrainLogisticRegression(encX_train,encX_test, y_train):
     return bestfitLR, y_pred
 
 def scoreLogger(y_test, y_pred):
-
-    score_format = logging.Formatter('%(asctime)s | %(name)s | %(messages)s | %(precision)s | %(recall)s | %(fscore)s | %(accuracy)s')
-    file_handler_score = logging.FileHandler('./LogsAndModels/ModelScore.log')
-    file_handler_score.setLevel(logging.INFO)
-    file_handler_score.setFormatter(score_format)
-    logger.addHandler(file_handler_score)
-
     (precision, recall, fscore, support) = precision_recall_fscore_support(y_test, y_pred, 
                                     labels = ['Closed with relief', 'Closed without relief'], 
-                                    pos_label= 'Closed with relief')
+                                    pos_label= 'Closed with relief', average= 'binary')
     
     accuracy = accuracy_score(y_test,y_pred)
 
-    extra = {'precision': precision,
-            'recall' : recall,
-            'fscore' : fscore,
-            'accuracy' : accuracy}
+    scoreString = " | ".join(str(score) for score in [precision,recall,fscore,accuracy])
 
-    logger.info('Scores in this order (precision, recall, fscore, accuracy)', extra=extra)
+    message = 'Scores in this order (precision, recall, fscore, accuracy) | ' + scoreString
 
-def saveModel(preprocessor, bestfitLR):
+    logger.info(message)
+
+    return fscore, accuracy
+
+def saveModel(preprocessor, bestfitLR, fscore, accuracy):
+    #creates pipeline object to save
     clf = Pipeline(steps=[('preprocessor', preprocessor),
                         ('logregclassifier', bestfitLR)])
 
-    pipeline_filename = "lrmodelpipeline.save"
+    #save model with date label to logandmodel folder
+    timestring = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    pipeline_filename = "./LogsAndModels/lrmodelpipeline" + timestring + ".save"
     joblib.dump(clf, pipeline_filename)
+
+    #checks bestscore, writes if new model score is better or there is no model to begin with
+    scoreMessage = "Fscore and Accuracy of best model |" + str(fscore) + "|" + str(accuracy)
+    best_pipeline_filename = "lrmodelpipeline.save"
+
+    if os.stat("./LogsAndModels/BestScore.log").st_size == 0:
+        logbestscore.info(scoreMessage)
+        joblib.dump(clf, best_pipeline_filename)
+    else:
+        with open("./LogsAndModels/BestScore.log") as f:
+            scoreString = f.readlines()[0]
+            scoreString = float(scoreString.split("|")[2])
+        if (scoreString < fscore):
+            logbestscore.info(scoreMessage)
+            joblib.dump(clf, best_pipeline_filename)
+
 
 def main():
 
@@ -265,9 +281,9 @@ def main():
 
     bestfitLR, y_pred = gridSearchTrainLogisticRegression(encX_train, encX_test, y_train)
 
-    scoreLogger(y_test, y_pred)
+    fscore, accuracy = scoreLogger(y_test, y_pred)
 
-    saveModel(preprocessor, bestfitLR)
+    saveModel(preprocessor, bestfitLR, fscore, accuracy)
 
 if __name__ == '__main__':
     try:

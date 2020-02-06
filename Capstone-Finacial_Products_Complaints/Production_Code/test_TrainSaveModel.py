@@ -8,6 +8,7 @@ import random
 from datetime import datetime, timedelta
 from sklearn.utils.testing import ignore_warnings
 from sklearn.exceptions import ConvergenceWarning
+import shutil
 
 
 def gen_datetime(min_year=1900, max_year=datetime.now().year):
@@ -16,6 +17,17 @@ def gen_datetime(min_year=1900, max_year=datetime.now().year):
     years = max_year - min_year + 1
     end = start + timedelta(days=365 * years)
     return start + (end - start) * random.random()
+
+def tempFile(source):
+    if source[-5:] == '_temp':
+        finDir = source[:-5]
+        finDir = shutil.copyfile(source, finDir)
+        os.remove(source)
+        return finDir
+    else:
+        tempDir = source + '_temp'
+        tempDir = shutil.copyfile(source, tempDir)
+        return tempDir
 
 class TestModel(unittest.TestCase):
 
@@ -186,8 +198,19 @@ class TestModel(unittest.TestCase):
 
         bestfitLR, y_pred = tsm.gridSearchTrainLogisticRegression(encX_train, encX_test, y_train)
 
+        #confrims the output of the model training
         self.assertIsInstance(y_pred, np.ndarray)
 
+    def test_scoreLogger(self):
+        y_pred = np.array(['Closed with relief','Closed with relief','Closed with relief','Closed without relief','Closed without relief'])
+        y_test = np.array(['Closed with relief','Closed with relief','Closed with relief','Closed with relief','Closed without relief'])
+        tsm.scoreLogger(y_test, y_pred)
+
+        #asserts log files are created
+        self.assertTrue(os.path.exists('./LogsAndModels/BestScore.log'))
+        self.assertTrue(os.path.exists('./LogsAndModels/ModelScore.log'))
+        self.assertTrue(os.path.exists('./LogsAndModels/ModelTrainingFailure.log'))
+    
     def test_saveModel(self):
         df = tsm.readCSVToDataFrame()
         df = tsm.cleanDf(df)
@@ -201,14 +224,32 @@ class TestModel(unittest.TestCase):
 
         bestfitLR, y_pred = tsm.gridSearchTrainLogisticRegression(encX_train, encX_test, y_train)
 
+        fscore, accuracy = tsm.scoreLogger(y_test, y_pred)
+
         self.assertTrue(os.path.exists('lrmodelpipeline.save'))
 
-    def test_scoreLogger(self):
-        y_pred = np.array(['Closed with relief','Closed with relief','Closed with relief','Closed without relief','Closed without relief'])
-        y_test = np.array(['Closed with relief','Closed with relief','Closed with relief','Closed with relief','Closed without relief'])
-        tsm.logger.info('Why?')
-        tsm.scoreLogger(y_test, y_pred)
+        tempLog = tempFile('./LogsAndModels/BestScore.log')
+        tempModel = tempFile('lrmodelpipeline.save')
 
+        with open('./LogsAndModels/BestScore.log', mode='w') as f:
+            f.write("2020-02-06 11:02:30,200 | Fscore and Accuracy of best model |1.0| 0.1")
+            f.close()
+        
+        tsm.saveModel(preprocessor, bestfitLR, fscore, accuracy)
+
+        with open('./LogsAndModels/BestScore.log') as f:
+            self.assertEqual(f.readlines()[0], "2020-02-06 11:02:30,200 | Fscore and Accuracy of best model |1.0| 0.1")
+        
+        with open('./LogsAndModels/BestScore.log', mode='w') as f:
+            f.write("2020-02-06 11:02:30,200 | Fscore and Accuracy of best model |0.0| 0.1")
+        
+        tsm.saveModel(preprocessor, bestfitLR, fscore, accuracy)
+
+        with open('./LogsAndModels/BestScore.log') as f:
+            self.assertNotEqual(f.readlines()[0], "2020-02-06 11:02:30,200 | Fscore and Accuracy of best model |1.0| 0.1")
+
+        tempFile(tempLog)
+        tempFile(tempModel)
 
 if __name__ == '__main__':
     unittest.main(exit=False)
