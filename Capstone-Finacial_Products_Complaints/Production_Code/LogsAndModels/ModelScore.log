@@ -22,3 +22,5 @@
 2020-02-06 16:41:26,631 | TrainSaveModel | INFO | Scores in this order (precision, recall, fscore, accuracy) | 1.0 | 0.75 | 0.8571428571428571 | 0.8
 2020-02-06 16:49:34,058 | TrainSaveModel | INFO | Scores in this order (precision, recall, fscore, accuracy) | 0.6333333333333333 | 0.35185185185185186 | 0.4523809523809524 | 0.8430034129692833
 2020-02-06 16:49:34,124 | TrainSaveModel | INFO | Scores in this order (precision, recall, fscore, accuracy) | 1.0 | 0.75 | 0.8571428571428571 | 0.8
+2020-02-07 09:20:47,660 | __main__ | INFO | Scores in this order (precision, recall, fscore, accuracy) | 0.3238410328362001 | 0.6680284424540549 | 0.4362167122946739 | 0.6736912470712159
+2020-02-07 10:12:17,556 | __main__ | INFO | Scores in this order (precision, recall, fscore, accuracy) | 0.32337224263640474 | 0.6631485113210911 | 0.43474771401744633 | 0.6734504171758982
