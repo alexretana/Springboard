@@ -1,16 +1,27 @@
 from flask import Flask, request, Blueprint
-from flask_restplus import Resource, Api
+from flask_restplus import Resource, Api, fields
+import TrainSaveModel as tsm
 import LoadModelPredict as lmp
 
 app = Flask(__name__)
 api = Api(app)
 
+prediction = api.model('Prediction', 
+                        {'complaintID': fields.Integer('Compalint ID Number'),
+                        'Outcome_Predicion': fields.String('Outcome of prediction'),
+                        'Proba': fields.Float('Percent chance of resolution with relief')})
+
+
+@api.route('/prediction/<int:complaintID>', endpoint='prediciton')
 class Prediction(Resource):
-    def get(self):
+    @api.doc(responses={ 200: 'OK', 400: 'Invalid Argument', 401: 'Compalint not found'},
+            params={ 'complaintID': 'Number that indentifies consumer\'s complaint'})
+    def get(self, compalintID):
         pass
 
+@api.route('/train_models')
 class Train_model(Resource):
-    def post(self):
+    def put(self):
         pass
 
 api.add_resource(Prediction, '/')
