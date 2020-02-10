@@ -221,16 +221,18 @@ def loadModelPredict(X):
 
     return loaded_clf, prediction, pred_proba_perc
 
-def main(argv):
-    complaintID = getRespUsinArgv(argv)
-
+def main(complaintID):
     resp = checkAndGetComplaintData(complaintID)
 
     df = createDF(complaintID,resp)
 
     X, Y = dropUnusedCols(df)
 
-    loadModelPredict(X)
+    apiModelPrediction = ['complaintID', 'Outcome_Prediction', 'Proba']
+
+    return dict(zip(apiModelPrediction, list(loadModelPredict(X))))
     
 if __name__ == '__main__':
+    complaintID = getRespUsinArgv(argv)
+    
     main(sys.argv[1:])
