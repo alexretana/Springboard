@@ -219,7 +219,7 @@ def loadModelPredict(X):
     print("Prediction of Outcome: ", prediction)
     print("With a ", round(pred_proba_perc, 2) , "% chance of being Closed with relief")
 
-    return loaded_clf, prediction, pred_proba_perc
+    return prediction, pred_proba_perc
 
 def main(complaintID):
     resp = checkAndGetComplaintData(complaintID)
@@ -228,11 +228,11 @@ def main(complaintID):
 
     X, Y = dropUnusedCols(df)
 
-    apiModelPrediction = ['complaintID', 'Outcome_Prediction', 'Proba']
+    pred, pred_proba = loadModelPredict(X)
 
-    return dict(zip(apiModelPrediction, list(loadModelPredict(X))))
+    return  [complaintID, pred, pred_proba]
     
 if __name__ == '__main__':
-    complaintID = getRespUsinArgv(argv)
+    complaintID = getRespUsinArgv(sys.argv[1:])
     
-    main(sys.argv[1:])
+    main(complaintID)

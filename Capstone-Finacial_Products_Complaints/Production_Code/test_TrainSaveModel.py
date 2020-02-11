@@ -251,5 +251,12 @@ class TestModel(unittest.TestCase):
         tempFile(tempLog)
         tempFile(tempModel)
 
+    def test_readScore(self):
+        confirmDictKeys = ['date', 'precision', 'recall', 'fscore', 'accuracy']
+
+        test_result = tsm.readScore()
+        self.assertListEqual(list(test_result.keys()), confirmDictKeys)
+        self.assertEqual(test_result, tsm.readScore(-1))
+
 if __name__ == '__main__':
     unittest.main(exit=False)

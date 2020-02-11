@@ -143,9 +143,7 @@ class TestModel(unittest.TestCase):
     def test_loadModelPredict(self):
         df = lmp.createDF(self.__class__.complaintID, self.__class__.resp)
         X, Y = lmp.dropUnusedCols(df)
-        model, pred, perc = lmp.loadModelPredict(X)
-        #model is returned (Not nothing is returned)
-        self.assertIsNotNone(model)
+        pred, perc = lmp.loadModelPredict(X)
         #outcomes are only one of two outcomes
         self.assertTrue((pred in ['Closed with relief', 'Closed without relief']))
         #percentage is between 0 and 100
