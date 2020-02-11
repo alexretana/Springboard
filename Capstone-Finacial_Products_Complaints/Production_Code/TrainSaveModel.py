@@ -277,6 +277,9 @@ def saveModel(preprocessor, bestfitLR, fscore, accuracy):
         if (scoreString < fscore):
             logbestscore.info(scoreMessage)
             joblib.dump(clf, best_pipeline_filename)
+            return 200
+        else:
+            return 201
 
 
 def main():
@@ -300,15 +303,17 @@ def main():
 
     fscore, accuracy = scoreLogger(y_test, y_pred)
 
-    saveModel(preprocessor, bestfitLR, fscore, accuracy)
+    status_code = saveModel(preprocessor, bestfitLR, fscore, accuracy)
+
+    return readScore(), status_code
 
 def run():
     try:
-        model_score = main()
+        model_score, status_code = main()
     except Exception:
         logger.exception('An ERROR has occured that stopped the model traing from finishing. Providing stack trace')
     else:
-        return model_score
+        return model_score, status_code
 
 if __name__ == '__main__':
     run()
