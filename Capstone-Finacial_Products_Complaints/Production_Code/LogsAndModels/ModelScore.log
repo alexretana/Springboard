@@ -1,4 +1,3 @@
-2020-02-06 11:02:30,200 | TrainSaveModel | INFO | Scores in this order (precision, recall, fscore, accuracy) | [1.  0.5] | [0.75 1.  ] | [0.85714286 0.66666667] | 0.8
 2020-02-06 11:27:38,736 | TrainSaveModel | INFO | Scores in this order (precision, recall, fscore, accuracy) | 1.0 | 0.75 | 0.8571428571428571 | 0.8
 2020-02-06 13:06:41,212 | TrainSaveModel | INFO | Scores in this order (precision, recall, fscore, accuracy) | 1.0 | 0.75 | 0.8571428571428571 | 0.8
 2020-02-06 13:14:46,862 | TrainSaveModel | INFO | Scores in this order (precision, recall, fscore, accuracy) | 1.0 | 0.75 | 0.8571428571428571 | 0.8
@@ -31,3 +30,4 @@
 2020-02-11 15:49:52,570 | TrainSaveModel | INFO | Scores in this order (precision, recall, fscore, accuracy) | 1.0 | 0.75 | 0.8571428571428571 | 0.8
 2020-02-11 15:51:42,477 | TrainSaveModel | INFO | Scores in this order (precision, recall, fscore, accuracy) | 0.32 | 0.6956521739130435 | 0.4383561643835616 | 0.718213058419244
 2020-02-11 15:51:42,530 | TrainSaveModel | INFO | Scores in this order (precision, recall, fscore, accuracy) | 1.0 | 0.75 | 0.8571428571428571 | 0.8
+2020-02-12 13:40:23,475 | TrainSaveModel | INFO | Scores in this order (precision, recall, fscore, accuracy) | 0.32396621847384005 | 0.6666824734446131 | 0.43604276996797675 | 0.6734374087992708

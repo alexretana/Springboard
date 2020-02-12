@@ -9,22 +9,26 @@ ns = api.namespace('devs', description= 'Tools for developers')
 
 
 prediction = api.model('prediction', 
-                        {'complaintID': fields.Integer(required='Compalint ID Number'),
-                        'Outcome_Prediction': fields.String('Outcome of prediction'),
-                        'Proba': fields.Float('Percent chance of resolution with relief')})
+                        {'complaintID': fields.Integer(default= None, required=True, example = 3398126, description= 'Compalint ID Number'),
+                        'Outcome_Prediction': fields.String(default=None, example= 'Closed without relief', description='Outcome of prediction'),
+                        'Proba': fields.Float(default=None, example= 20.31, description='Percent chance of resolution with relief')})
 
-model_score = api.model('model_score',
-                        {'date': fields.String('String describing time and date of training for a model', required=True),
-                        'precision': fields.Float('Precision score of model'),
-                        'recall': fields.Float('Recall score of model'),
-                        'fscore': fields.Float('F1-score of model'),
-                        'accuracy': fields.Float('Accuracy score of model')})
+model_scores = api.model('model_scores',
+                        {'date': fields.String(default=None,description='String describing time and date of training for a model', example='2020-02-11 14:50:40', required=True),
+                        'precision': fields.Float(default=None,description='Precision score of model', example=0.324879),
+                        'recall': fields.Float(default=None,description='Recall score of model', example=0.666638),
+                        'fscore': fields.Float(default=None,description='F1-score of model', example=0.436859),
+                        'accuracy': fields.Float(default=None,description='Accuracy score of model', example=0.6749668)})
+
+score_log = api.model('score_log', 
+                    {'score_log': fields.List(fields.Nested(model_scores), description= "List of model_scores for all scores currently store in server logfile")})
 
 @ns.route('/prediction/<int:complaintID>', endpoint='prediciton')
 class Prediction(Resource):
-    @ns.doc(responses={ 200: 'OK', 400: 'Invalid Argument', 401: 'Compalint not found'},
-            params={ 'complaintID': 'Number that indentifies consumer\'s complaint'})
-    # @ns.expect(prediction)
+    @ns.doc(params={ 'complaintID': 'Number that indentifies consumer\'s complaint'})
+    @ns.response(200, 'OK', prediction)
+    @ns.response(400, 'Error Occured')
+    @ns.response(401, 'Complaint could not be found')
     @ns.marshal_with(prediction)
     def get(self, complaintID):
         """
@@ -41,13 +45,33 @@ class Prediction(Resource):
 
 @ns.route('/train_model')
 class Train_model(Resource):
-    """
-    Trains the model in the server. If the model is best to date, it becomes the primary model
-    """
-    @ns.doc(responses = {200: 'OK', 400: 'Model Training Failed', 201: 'Model Trained, but did not out preform the previous model'})
+    @ns.response(200, 'OK', model_scores)
+    @ns.response(201, 'Model Trained, but did not out preform the previous model', model_scores)
+    @ns.response(400, 'Model Training Failed')
+    @ns.marshal_with(model_scores)
     def put(self):
+        """
+        Trains the model in the server. If the model is best to date, it becomes the primary model
+        """
         model_score, status_code = tsm.run()
         return model_score, status_code
+
+    @ns.response(200, 'OK', score_log)
+    @ns.response(400, 'Unable to fetch log')
+    @ns.marshal_list_with(model_scores)
+    def get(self):
+        """
+        Returns json of all model scores. All the model scores in the ModelScore.log file are returned
+        """
+        entry_count = len(open('./LogsAndModels/ModelScore.log').readlines())
+        score_log = []
+
+        for i in range(entry_count):
+            log_entry = tsm.readScore(i)
+            score_log.append(log_entry)
+        
+        return score_log
+
 
 
 
