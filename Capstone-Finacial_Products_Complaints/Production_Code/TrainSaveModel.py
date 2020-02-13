@@ -10,7 +10,9 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import precision_recall_fscore_support, roc_auc_score, accuracy_score
+from sklearn.utils.testing import ignore_warnings
 from sklearn.exceptions import ConvergenceWarning
+import warnings
 import joblib
 import wget
 import zipfile
@@ -42,6 +44,7 @@ best_score_handler.setLevel(logging.INFO)
 best_score_handler.setFormatter(bestFormatter)
 logbestscore.addHandler(best_score_handler)
 
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 def readScore(entry = -1):
     with open("./LogsAndModels/ModelScore.log") as f:
@@ -221,6 +224,7 @@ def createPreprocessorAndTrain(X):
 
     return preprocessor
 
+@ignore_warnings
 def gridSearchTrainLogisticRegression(encX_train,encX_test, y_train):
 
     lr = LogisticRegression(n_jobs=-1, solver='saga', penalty='l1')
