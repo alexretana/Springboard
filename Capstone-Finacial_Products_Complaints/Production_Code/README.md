@@ -12,10 +12,10 @@ To run this file, the csv from the CFPB's website at the link http://files.consu
 
 To run this file, the lrmodelpipeline.save must be in the same directory. It also requires one arguement, specified with the flag -i or --complaint, the complaint ID. Using this code, it connects to the CFPB's Api for database access and pulls all the submitted information. The file tansfroms the data, and pushes through the logistic regression model, then prints to screen the most likely outcome, along with the probability of being resolved with relief.
 
-## test_LoadModelPredict.py
+## test_LoadModelPredict.py & test_TrainSaveModel.py
 
-This is a unittest file that ensures the functionality of the LoadModelPredict.py including all the defined function in the file.
+This is a unittest file that ensures the functionality of the LoadModelPredict.py and TrainSaveModel.py including all the defined function in the file.
 
 ## flask_app.py
 
-Incompleted python flask file to be called when serving the API.
+Python Flask File, uses flask and flask restplus to serve a basic api to call the methods of the other python scripts. The swagger documentation can be seen making a get request to the base url.
