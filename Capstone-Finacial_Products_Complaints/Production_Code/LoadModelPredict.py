@@ -1,4 +1,5 @@
-import sys, getopt
+import sys
+import getopt
 import requests
 import pandas as pd
 import numpy as np
