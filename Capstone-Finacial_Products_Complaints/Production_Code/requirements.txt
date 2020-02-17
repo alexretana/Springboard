@@ -4,7 +4,6 @@ re==2.2.1
 sklearn==0.21.3
 joblib==0.13.2
 wget==3.2
-logging==0.5.1.2
 requests==2.22.0
 flask==1.1.1
 flask_restplus==0.13.0
