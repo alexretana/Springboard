@@ -1,1 +1,15 @@
-FROM fastgenomics/sklearn:0.19.1-p36-v5
+FROM ecoron/python36-sklearn:latest
+
+WORKDIR /usr/src/app
+
+COPY requirements.txt .
+
+RUN pip install -r requirements.txt
+
+COPY . .
+
+ENTRYPOINT ["python"]
+
+EXPOSE 5000
+
+CMD ["flask_app.py"]
