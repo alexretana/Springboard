@@ -8,8 +8,8 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-ENTRYPOINT ["python"]
-
 EXPOSE 5000
+
+ENTRYPOINT ["python"]
 
 CMD ["flask_app.py"]
