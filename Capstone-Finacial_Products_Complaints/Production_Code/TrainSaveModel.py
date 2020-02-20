@@ -47,21 +47,28 @@ logbestscore.addHandler(best_score_handler)
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 def readScore(entry = -1):
-    with open("./LogsAndModels/ModelScore.log") as f:
-        scoreString = f.readlines()[entry]
-        precisionString = float(scoreString.split("|")[4].strip())
-        recallString = float(scoreString.split("|")[5].strip())
-        fscoreString = float(scoreString.split("|")[6].strip())
-        accuracyString = float(scoreString.split("|")[7].strip())
-        dateString = scoreString.split("|")[0].split(",")[0]
-        
-        TestScoreObj = {'date' : dateString,
-                        'precision': precisionString,
-                        'recall': recallString,
-                        'fscore': fscoreString,
-                        'accuracy': accuracyString}
-        
-        return TestScoreObj
+    try:
+        with open("./LogsAndModels/ModelScore.log") as f:
+            scoreString = f.readlines()[entry]
+            precisionString = float(scoreString.split("|")[4].strip())
+            recallString = float(scoreString.split("|")[5].strip())
+            fscoreString = float(scoreString.split("|")[6].strip())
+            accuracyString = float(scoreString.split("|")[7].strip())
+            dateString = scoreString.split("|")[0].split(",")[0]
+        except:
+            TestScoreObj = {'date' : 'Null',
+                            'precision': 0.0,
+                            'recall': 0.0,
+                            'fscore': 0.0,
+                            'accuracy': 0.0}
+        else:
+            TestScoreObj = {'date' : dateString,
+                            'precision': precisionString,
+                            'recall': recallString,
+                            'fscore': fscoreString,
+                            'accuracy': accuracyString}
+        finally:
+            return TestScoreObj
 
 def downloadCFPBDataset():
     url = 'http://files.consumerfinance.gov/ccdb/complaints.csv.zip'
