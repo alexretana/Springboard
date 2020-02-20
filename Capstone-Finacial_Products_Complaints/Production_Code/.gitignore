@@ -1,2 +1,3 @@
 complaints.csv
-**.log
+/LogsAndModels/*.log
+/LogsAndModels/*.save
