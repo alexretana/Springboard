@@ -55,20 +55,20 @@ def readScore(entry = -1):
             fscoreString = float(scoreString.split("|")[6].strip())
             accuracyString = float(scoreString.split("|")[7].strip())
             dateString = scoreString.split("|")[0].split(",")[0]
-        except:
-            TestScoreObj = {'date' : 'Null',
-                            'precision': 0.0,
-                            'recall': 0.0,
-                            'fscore': 0.0,
-                            'accuracy': 0.0}
-        else:
-            TestScoreObj = {'date' : dateString,
-                            'precision': precisionString,
-                            'recall': recallString,
-                            'fscore': fscoreString,
-                            'accuracy': accuracyString}
-        finally:
-            return TestScoreObj
+    except:
+        TestScoreObj = {'date' : 'Null',
+                        'precision': 0.0,
+                        'recall': 0.0,
+                        'fscore': 0.0,
+                        'accuracy': 0.0}
+    else:
+        TestScoreObj = {'date' : dateString,
+                        'precision': precisionString,
+                        'recall': recallString,
+                        'fscore': fscoreString,
+                        'accuracy': accuracyString}
+    finally:
+        return TestScoreObj
 
 def downloadCFPBDataset():
     url = 'http://files.consumerfinance.gov/ccdb/complaints.csv.zip'
