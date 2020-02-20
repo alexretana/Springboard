@@ -4,7 +4,7 @@ import TrainSaveModel as tsm
 import LoadModelPredict as lmp
 
 app = Flask(__name__)
-api = Api(app, version='1.0.0', title= 'CFPB Compalint Predictor', description= 'An API to predict the Resolution Outcome of Complaints submitted to the Consumer Financial Protection Bureau (CFPB)')
+api = Api(app, version='1.0.0', title= 'CFPB Complaint Predictor', description= 'An API to predict the Resolution Outcome of Complaints submitted to the Consumer Financial Protection Bureau (CFPB)')
 dev_ns = api.namespace('devs', description= 'Tools for developers')
 admin_ns = api.namespace('admin', description= 'Tools for admin to interact with models')
 
