@@ -77,4 +77,4 @@ The process for this project follows an outline as such:
 
 To run the jupyter notebooks, you'll first have to download the csv file from the CFPB website: https://www.consumerfinance.gov/data-research/consumer-complaints/#download-the-data.
 
-The next step in this project is to create the production code and allow it to be called by an API. The plan is to use swagger to define the functionality and then build the back-end, ending with a unittest file to test edge cases and scenarios.
+The final production of the model was developed into and API that can spun up on a cloud hosted services via a Dockerfile. Production code can be found at https://github.com/alexretana/cfpbpredictor.
